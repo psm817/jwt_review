@@ -1,4 +1,4 @@
-package com.example.jwt_review;
+package com.example.jwt_review.global.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
