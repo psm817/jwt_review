@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.util.MimeTypeUtils.ALL_VALUE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -36,7 +37,7 @@ public class MemberController {
         private final String accessToken;
     }
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
     public RsData<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse resp) {
 //        // 테스트용
 //        resp.addHeader("Authentication", "JWT Token");
@@ -48,6 +49,23 @@ public class MemberController {
                 "S-1",
                 "access Token 생성",
                 new LoginResponse(accessToken)
+        );
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class MeResponse {
+        private final Member member;
+    }
+
+    @GetMapping(value = "/me", consumes = ALL_VALUE)
+    public RsData<MeResponse> me() {
+        Member member = memberService.findByUsername("user1").get();
+
+        return RsData.of(
+                "S-2",
+                "확인 성공",
+                new MeResponse(member)
         );
     }
 }
