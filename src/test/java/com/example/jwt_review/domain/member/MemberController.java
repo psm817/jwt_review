@@ -58,4 +58,10 @@ class MemberControllerTest {
 
         assertThat(authentication).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("로그인 토큰 발급 검증")
+    void t2() throws Exception {
+
+    }
 }
