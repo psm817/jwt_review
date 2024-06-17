@@ -44,4 +44,8 @@ public class MemberService {
         // 유효기간 1년
         return jwtProvider.genToken(member.toClaims(), 60 * 60 * 24 * 365);
     }
+
+    public Optional<Member> findById(long id) {
+        return memberRepository.findById(id);
+    }
 }
