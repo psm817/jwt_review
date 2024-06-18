@@ -2,15 +2,20 @@ package com.example.jwt_review.domain.article.controller;
 
 import com.example.jwt_review.domain.article.entity.Article;
 import com.example.jwt_review.domain.article.service.ArticleService;
+import com.example.jwt_review.domain.member.entity.Member;
+import com.example.jwt_review.domain.member.service.MemberService;
 import com.example.jwt_review.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +26,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "api/v1/articles")
 public class ArticleController {
     private final ArticleService articleService;
+    private final MemberService memberService;
 
     @AllArgsConstructor
     @Getter
@@ -59,5 +65,38 @@ public class ArticleController {
                 "%d번 게시물은 존재하지 않습니다.".formatted(id),
                 null
         ));
+    }
+
+    @Data
+    public static class WriteRequest {
+        @NotBlank
+        private String subject;
+
+        @NotBlank
+        private String content;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class WriteResponse {
+        private final Article article;
+    }
+
+    @PostMapping(value = "")
+    @Operation(summary = "등록", security = @SecurityRequirement(name = "bearerAuth"))
+    public RsData<WriteResponse> write(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody WriteRequest writeRequest
+    ) {
+        Member member = memberService.findByUsername(user.getUsername()).orElseThrow();
+        RsData<Article> writeRs = articleService.write(member, writeRequest.getSubject(), writeRequest.getContent());
+
+        if(writeRs.isFail()) return (RsData) writeRs;
+
+        return RsData.of(
+                writeRs.getResultCode(),
+                writeRs.getMsg(),
+                new WriteResponse(writeRs.getData())
+        );
     }
 }
