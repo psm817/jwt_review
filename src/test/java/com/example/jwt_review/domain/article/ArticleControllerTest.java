@@ -44,4 +44,24 @@ public class ArticleControllerTest {
                 .andExpect(jsonPath("$.msg").exists())
                 .andExpect(jsonPath("$.data.articles[0].id").exists());
     }
+
+    @Test
+    @WithUserDetails("user1")
+    @DisplayName("GET /articles/1")
+    void t2() throws Exception {
+
+        // When
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/articles/1")
+                )
+                .andDo(print());
+
+        // Then
+        resultActions
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.resultCode").value("S-1"))
+                .andExpect(jsonPath("$.msg").exists())
+                .andExpect(jsonPath("$.data.article.id").value(1));
+    }
 }
